@@ -1,19 +1,26 @@
 import "dotenv/config";
 import express from "express";
-import { toNodeHandler } from "better-auth/node";
-import { auth } from "./auth";
 import cors from "cors";
+import authRouter from "./routes/auth.router";
+import meRouter from "./routes/me.router";
 
 const app = express();
+
 app.use(
   cors({
-    origin: "http://localhost:3000", // Replace with your frontend's origin
-    methods: ["GET", "POST", "PUT", "DELETE"], // Specify allowed HTTP methods
-    credentials: true, // Allow credentials (cookies, authorization headers, etc.)
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    credentials: true,
   }),
 );
-app.all("/api/auth/*splat", toNodeHandler(auth));
+
+// Better Auth must come before express.json() — it reads the raw body itself
+app.use("/api/auth", authRouter);
+
 app.use(express.json());
+
+app.use("/api/me", meRouter);
+
 app.listen(process.env.PORT, () => {
   console.log(`Server is running on http://localhost:${process.env.PORT}`);
 });

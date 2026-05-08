@@ -19,7 +19,7 @@ function SignUpPage() {
     },
     onSubmit: async ({ value }) => {
       setServerError(null);
-      const { error } = await signUp.email({
+      const { error, data } = await signUp.email({
         name: value.name,
         email: value.email,
         password: value.password,
@@ -29,8 +29,9 @@ function SignUpPage() {
         setServerError(error.message ?? "Something went wrong.");
         return;
       }
-
-      navigate({ to: "/dashboard" });
+      if (data.user) {
+        navigate({ to: "/dashboard" });
+      }
     },
   });
 

@@ -14,7 +14,7 @@
     "db:migrate": "drizzle-kit migrate",
     "db:generate": "drizzle-kit generate",
     "db:studio": "drizzle-kit studio",
-    "auth:generate": "auth generate --config src/auth.ts --output src/db/schema.ts"
+    "auth:generate": "npx auth@latest generate --config src/auth.ts --output src/db/schema.ts"
   },
   "dependencies": {
     "better-auth": "^1.6.9",
@@ -22,7 +22,8 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",

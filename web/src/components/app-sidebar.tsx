@@ -10,29 +10,36 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "./ui/sidebar";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { Home, Users } from "lucide-react";
 
 const items = [
   {
     title: "Overview",
-    url: "/dashboard",
+    to: "/dashboard",
     icon: Home,
     exact: true,
   },
   {
     title: "Teams",
-    url: "/dashboard/teams",
+    to: "/dashboard/teams",
     icon: Users,
     exact: false,
   },
-];
+] as const;
 
 export function AppSidebar({
   user,
 }: {
   user: { name: string; email: string };
 }) {
+  const pathname = useRouterState({
+    select: (state) => state.location.pathname,
+  });
+
+  const normalizedPathname =
+    pathname !== "/" && pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
+
   return (
     <Sidebar>
       <SidebarHeader className="p-4 h-16 flex items-center justify-start border-b">
@@ -44,16 +51,17 @@ export function AppSidebar({
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <Link
-                      to={item.url}
-                      activeOptions={{ exact: item.exact }}
-                      activeProps={{
-                        className:
-                          "bg-accent text-accent-foreground font-medium",
-                      }}
-                    >
+                <SidebarMenuItem key={item.to}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={
+                      item.exact
+                        ? normalizedPathname === item.to
+                        : normalizedPathname === item.to ||
+                          normalizedPathname.startsWith(`${item.to}/`)
+                    }
+                  >
+                    <Link to={item.to}>
                       <item.icon />
                       <span>{item.title}</span>
                     </Link>

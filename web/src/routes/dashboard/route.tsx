@@ -2,9 +2,12 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { getSession } from "../../lib/auth-client";
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeaders } from "@tanstack/react-start/server";
-import { SidebarProvider, SidebarTrigger } from "../../components/ui/sidebar";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "../../components/ui/sidebar";
 import { AppSidebar } from "../../components/app-sidebar";
-import { TeamsManager } from "#/components/TeamsManager";
 
 const fetchServerSession = createServerFn({ method: "GET" }).handler(
   async () => {
@@ -37,9 +40,17 @@ function DashboardLayout() {
   const { session } = Route.useRouteContext();
 
   return (
-    <>
-      Pick Team
-      <TeamsManager />
-    </>
+    <SidebarProvider>
+      <AppSidebar user={session.user} />
+      <SidebarInset>
+        <div className="sticky top-0 z-10 flex h-16 items-center gap-3 border-b bg-background px-4">
+          <SidebarTrigger />
+          <h1 className="text-lg font-semibold">Dashboard</h1>
+        </div>
+        <div className="p-4">
+          <Outlet />
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

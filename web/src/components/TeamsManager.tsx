@@ -154,7 +154,7 @@ export function TeamsManager() {
                     <div className="mt-auto pt-4 flex flex-col gap-3">
                       <Button asChild className="w-full">
                         <Link to="/$slug" params={{ slug: team.slug }}>
-                          View Projects
+                          Open Workspace
                         </Link>
                       </Button>
                       <div className="flex gap-3">

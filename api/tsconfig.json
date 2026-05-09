@@ -7,6 +7,7 @@
     // Environment Settings
     "module": "commonjs",
     "target": "es6",
+    "types": ["node"],
 
     // Module Resolution
     "esModuleInterop": true,
@@ -14,13 +15,18 @@
 
     // Output
     "sourceMap": true,
-    "declaration": true,
-    "declarationMap": true,
+    "declaration": false,
+    "declarationMap": false,
 
     // Type Checking
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
     "skipLibCheck": true
-  }
+  },
+  "ts-node": {
+    "files": true
+  },
+  "include": ["src/**/*.ts", "src/**/*.d.ts"],
+  "exclude": ["dist", "drizzle.config.ts"]
 }

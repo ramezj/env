@@ -10,7 +10,6 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { useState } from "react";
-import { Link } from "@tanstack/react-router";
 
 export function ProjectsManager({
   organizationId,
@@ -34,7 +33,9 @@ export function ProjectsManager({
       description: "",
     },
     validators: {
-      onChange: createProjectSchema.omit({ organizationId: true }),
+      onChange: createProjectSchema
+        .omit({ organizationId: true })
+        .required({ description: true }),
     },
     onSubmit: async ({ value }) => {
       await createProject.mutateAsync({

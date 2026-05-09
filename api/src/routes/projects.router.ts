@@ -5,6 +5,15 @@ import { db } from "../db";
 import { project, member } from "../db/schema";
 import { eq, and } from "drizzle-orm";
 import { createProjectSchema, updateProjectSchema } from "../schemas/projects.schemas";
+import { auth } from "../auth";
+
+async function hasOrganizationAccess(c: any, organizationId: string) {
+  const org = await auth.api.getFullOrganization({
+    query: { organizationId },
+    headers: c.req.raw.headers,
+  });
+  return Boolean(org);
+}
 
 export const projectsRouter = new Hono<SessionVar>()
   .use(requireAuth)
@@ -12,17 +21,8 @@ export const projectsRouter = new Hono<SessionVar>()
   // POST /api/projects
   .post("/", zValidator("json", createProjectSchema), async (c) => {
     const { organizationId, name, description } = c.req.valid("json");
-    const { user } = c.var.session;
 
-    // Verify user is a member of the organization
-    const membership = await db.query.member.findFirst({
-      where: and(
-        eq(member.userId, user.id),
-        eq(member.organizationId, organizationId)
-      ),
-    });
-
-    if (!membership) {
+    if (!(await hasOrganizationAccess(c, organizationId))) {
       return c.json({ error: "Forbidden" }, 403);
     }
 
@@ -44,21 +44,12 @@ export const projectsRouter = new Hono<SessionVar>()
   // GET /api/projects?organizationId=xyz
   .get("/", async (c) => {
     const organizationId = c.req.query("organizationId");
-    const { user } = c.var.session;
 
     if (!organizationId) {
       return c.json({ error: "organizationId is required" }, 400);
     }
 
-    // Verify user is a member of the organization
-    const membership = await db.query.member.findFirst({
-      where: and(
-        eq(member.userId, user.id),
-        eq(member.organizationId, organizationId)
-      ),
-    });
-
-    if (!membership) {
+    if (!(await hasOrganizationAccess(c, organizationId))) {
       return c.json({ error: "Forbidden" }, 403);
     }
 
@@ -73,7 +64,6 @@ export const projectsRouter = new Hono<SessionVar>()
   // GET /api/projects/:projectId
   .get("/:projectId", async (c) => {
     const projectId = c.req.param("projectId");
-    const { user } = c.var.session;
 
     const data = await db.query.project.findFirst({
       where: eq(project.id, projectId),
@@ -81,15 +71,9 @@ export const projectsRouter = new Hono<SessionVar>()
 
     if (!data) return c.json({ error: "Project not found" }, 404);
 
-    // Verify membership
-    const membership = await db.query.member.findFirst({
-      where: and(
-        eq(member.userId, user.id),
-        eq(member.organizationId, data.organizationId)
-      ),
-    });
-
-    if (!membership) return c.json({ error: "Forbidden" }, 403);
+    if (!(await hasOrganizationAccess(c, data.organizationId))) {
+      return c.json({ error: "Forbidden" }, 403);
+    }
 
     return c.json({ data });
   })
@@ -98,7 +82,6 @@ export const projectsRouter = new Hono<SessionVar>()
   .patch("/:projectId", zValidator("json", updateProjectSchema), async (c) => {
     const projectId = c.req.param("projectId");
     const { name, description } = c.req.valid("json");
-    const { user } = c.var.session;
 
     const existing = await db.query.project.findFirst({
       where: eq(project.id, projectId),
@@ -106,15 +89,9 @@ export const projectsRouter = new Hono<SessionVar>()
 
     if (!existing) return c.json({ error: "Project not found" }, 404);
 
-    const membership = await db.query.member.findFirst({
-      where: and(
-        eq(member.userId, user.id),
-        eq(member.organizationId, existing.organizationId)
-      ),
-    });
-
-    // Typically, only admins should edit a project, but we'll allow any member for now
-    if (!membership) return c.json({ error: "Forbidden" }, 403);
+    if (!(await hasOrganizationAccess(c, existing.organizationId))) {
+      return c.json({ error: "Forbidden" }, 403);
+    }
 
     const updated = await db
       .update(project)
@@ -132,7 +109,6 @@ export const projectsRouter = new Hono<SessionVar>()
   // DELETE /api/projects/:projectId
   .delete("/:projectId", async (c) => {
     const projectId = c.req.param("projectId");
-    const { user } = c.var.session;
 
     const existing = await db.query.project.findFirst({
       where: eq(project.id, projectId),
@@ -140,15 +116,22 @@ export const projectsRouter = new Hono<SessionVar>()
 
     if (!existing) return c.json({ error: "Project not found" }, 404);
 
-    const membership = await db.query.member.findFirst({
+    if (!(await hasOrganizationAccess(c, existing.organizationId))) {
+      return c.json({ error: "Forbidden" }, 403);
+    }
+
+    const currentMembership = await db.query.member.findFirst({
       where: and(
-        eq(member.userId, user.id),
+        eq(member.userId, c.var.session.user.id),
         eq(member.organizationId, existing.organizationId)
-      ),
+      )
     });
 
     // Need to be at least admin to delete a project
-    if (!membership || membership.role !== "admin" && membership.role !== "owner") {
+    if (
+      !currentMembership ||
+      (currentMembership.role !== "admin" && currentMembership.role !== "owner")
+    ) {
       return c.json({ error: "Forbidden: Admins only" }, 403);
     }
 

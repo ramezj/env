@@ -1,40 +1,25 @@
 import { queryOptions, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "../lib/api-client";
-import { createServerFn } from "@tanstack/react-start";
-import { getRequestHeaders } from "@tanstack/react-start/server";
 
 export const projectKeys = {
   all: (organizationId: string) => ["projects", organizationId] as const,
   detail: (projectId: string) => ["projects", "detail", projectId] as const,
 };
 
-export const fetchProjectsFn = createServerFn({ method: "GET" })
-  .inputValidator((organizationId: string) => organizationId)
-  .handler(async ({ data: organizationId }) => {
-    let options = {};
-    if (typeof window === "undefined") {
-      const headers = getRequestHeaders();
-      options = { headers: headers as any };
-    }
-
-    const res = await apiClient.api.projects.$get(
-      { query: { organizationId } },
-      options
-    );
-
-    if (!res.ok) {
-      if (res.status === 403) throw new Error("Forbidden");
-      throw new Error("Failed to fetch projects");
-    }
-
-    const json = await res.json();
-    return json.data;
-  });
-
 export const projectsQueryOptions = (organizationId: string) =>
   queryOptions({
     queryKey: projectKeys.all(organizationId),
-    queryFn: () => fetchProjectsFn({ data: organizationId }),
+    queryFn: async () => {
+      const res = await apiClient.api.projects.$get({ query: { organizationId } });
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        const message =
+          (body as { error?: string } | null)?.error ?? "Failed to fetch projects";
+        throw new Error(`Failed to fetch projects (${res.status}): ${message}`);
+      }
+      const json = await res.json();
+      return json.data;
+    },
     enabled: !!organizationId,
   });
 

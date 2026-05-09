@@ -1,15 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ProjectsManager } from "../../../components/ProjectsManager";
-import { projectsQueryOptions } from "../../../queries/projects.queries";
 
 export const Route = createFileRoute("/dashboard/teams/$teamId")({
   component: TeamProjectsPage,
-  loader: async ({ context, params }) => {
-    // Prefetch projects for this organization before the page renders
-    await context.queryClient.ensureQueryData(
-      projectsQueryOptions(params.teamId),
-    );
-  },
 });
 
 function TeamProjectsPage() {

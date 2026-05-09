@@ -1,28 +1,31 @@
 import "dotenv/config";
-import express from "express";
-import cors from "cors";
-import authRouter from "./routes/auth.router";
-import meRouter from "./routes/me.router";
-import teamsRouter from "./routes/teams.router";
+import { serve } from "@hono/node-server";
+import { Hono } from "hono";
+import { cors } from "hono/cors";
+import { auth } from "./auth";
+import { teamsRouter } from "./routes/teams.router";
+import { meRouter } from "./routes/me.router";
 
-const app = express();
+const app = new Hono()
+  .use(
+    cors({
+      origin: "http://localhost:3000",
+      allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+      allowHeaders: ["Content-Type", "Authorization"],
+      credentials: true,
+    }),
+  )
+  // Better Auth handles all /api/auth/* routes
+  .on(["GET", "POST"], "/api/auth/**", (c) => auth.handler(c.req.raw))
+  // App routes — must be chained so TypeScript captures the route types
+  .route("/api/me", meRouter)
+  .route("/api/teams", teamsRouter);
 
-app.use(
-  cors({
-    origin: "http://localhost:3000",
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    credentials: true,
-  }),
-);
+const port = Number(process.env.PORT) || 4000;
 
-// Better Auth must come before express.json() — it reads the raw body itself
-app.use("/api/auth", authRouter);
-
-app.use(express.json());
-
-app.use("/api/me", meRouter);
-app.use("/api/teams", teamsRouter);
-
-app.listen(process.env.PORT, () => {
-  console.log(`Server is running on http://localhost:${process.env.PORT}`);
+serve({ fetch: app.fetch, port }, () => {
+  console.log(`Server is running on http://localhost:${port}`);
 });
+
+// Export the app type for the Hono RPC client
+export type AppType = typeof app;

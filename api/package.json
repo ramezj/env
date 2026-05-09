@@ -17,18 +17,17 @@
     "auth:generate": "npx auth@latest generate --config src/auth.ts --output src/db/schema.ts"
   },
   "dependencies": {
+    "@hono/node-server": "^2.0.2",
+    "@hono/zod-validator": "^0.7.6",
     "better-auth": "^1.6.9",
     "better-sqlite3": "^12.9.0",
-    "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
-    "express": "^5.2.1",
+    "hono": "^4.12.18",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.6",
     "@types/node": "^25.6.0",
     "drizzle-kit": "^0.31.10",
     "nodemon": "^3.1.14",

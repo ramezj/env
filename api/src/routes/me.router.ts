@@ -1,14 +1,7 @@
-import { Router } from "express";
-import { fromNodeHeaders } from "better-auth/node";
+import { Hono } from "hono";
 import { auth } from "../auth";
 
-const router = Router();
-
-router.get("/", async (req, res) => {
-  const session = await auth.api.getSession({
-    headers: fromNodeHeaders(req.headers),
-  });
-  return res.json(session);
+export const meRouter = new Hono().get("/", async (c) => {
+  const session = await auth.api.getSession({ headers: c.req.raw.headers });
+  return c.json(session);
 });
-
-export default router;

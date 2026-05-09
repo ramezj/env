@@ -1,4 +1,9 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { apiClient } from "../lib/api-client";
 
 // ── Query Keys ───────────────────────────────────────────────────────────────
@@ -10,16 +15,18 @@ export const teamKeys = {
 
 // ── Queries ──────────────────────────────────────────────────────────────────
 
+export const teamsQueryOptions = queryOptions({
+  queryKey: teamKeys.all(),
+  queryFn: async () => {
+    const res = await apiClient.api.teams.$get();
+    if (!res.ok) throw new Error("Failed to fetch teams");
+    const json = await res.json();
+    return json.data;
+  },
+});
+
 export function useTeams() {
-  return useQuery({
-    queryKey: teamKeys.all(),
-    queryFn: async () => {
-      const res = await apiClient.api.teams.$get();
-      if (!res.ok) throw new Error("Failed to fetch teams");
-      const json = await res.json();
-      return json.data;
-    },
-  });
+  return useQuery(teamsQueryOptions);
 }
 
 export function useTeam(teamId: string) {

@@ -11,6 +11,7 @@ import { apiClient } from "../lib/api-client";
 export const teamKeys = {
   all: () => ["teams"] as const,
   detail: (teamId: string) => ["teams", teamId] as const,
+  bySlug: (slug: string) => ["teams", "slug", slug] as const,
 };
 
 // ── Queries ──────────────────────────────────────────────────────────────────
@@ -42,6 +43,23 @@ export function useTeam(teamId: string) {
       return json.data;
     },
     enabled: !!teamId,
+  });
+}
+
+export function useTeamBySlug(slug: string) {
+  return useQuery({
+    queryKey: teamKeys.bySlug(slug),
+    queryFn: async () => {
+      const res = await apiClient.api.teams.$get();
+      if (!res.ok) throw new Error("Failed to fetch teams");
+      const json = await res.json();
+      const team = json.data?.find(
+        (item: { slug: string }) => item.slug === slug,
+      );
+      if (!team) throw new Error("Team not found");
+      return team;
+    },
+    enabled: !!slug,
   });
 }
 

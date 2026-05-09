@@ -2,9 +2,12 @@ import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { requireAuth, type SessionVar } from "../middleware/requireAuth";
 import { db } from "../db";
-import { project, member } from "../db/schema";
+import { environment, project, member } from "../db/schema";
 import { eq, and } from "drizzle-orm";
-import { createProjectSchema, updateProjectSchema } from "../schemas/projects.schemas";
+import {
+  createProjectSchema,
+  updateProjectSchema,
+} from "../schemas/projects.schemas";
 import { auth } from "../auth";
 
 async function hasOrganizationAccess(c: any, organizationId: string) {
@@ -38,7 +41,25 @@ export const projectsRouter = new Hono<SessionVar>()
       .returning()
       .get();
 
-    return c.json({ data: newProject }, 201);
+    const defaultStageNames = ["dev", "staging", "prod"] as const;
+    await db.insert(environment).values(
+      defaultStageNames.map((stageName) => ({
+        id: crypto.randomUUID(),
+        projectId: id,
+        name: stageName,
+      })),
+    );
+
+    const projectWithStages = await db.query.project.findFirst({
+      where: eq(project.id, newProject.id),
+      with: {
+        environments: {
+          orderBy: (environment, { asc }) => [asc(environment.createdAt)],
+        },
+      },
+    });
+
+    return c.json({ data: projectWithStages ?? newProject }, 201);
   })
 
   // GET /api/projects?organizationId=xyz
@@ -55,6 +76,11 @@ export const projectsRouter = new Hono<SessionVar>()
 
     const data = await db.query.project.findMany({
       where: eq(project.organizationId, organizationId),
+      with: {
+        environments: {
+          orderBy: (environment, { asc }) => [asc(environment.createdAt)],
+        },
+      },
       orderBy: (project, { desc }) => [desc(project.createdAt)],
     });
 
@@ -123,8 +149,8 @@ export const projectsRouter = new Hono<SessionVar>()
     const currentMembership = await db.query.member.findFirst({
       where: and(
         eq(member.userId, c.var.session.user.id),
-        eq(member.organizationId, existing.organizationId)
-      )
+        eq(member.organizationId, existing.organizationId),
+      ),
     });
 
     // Need to be at least admin to delete a project

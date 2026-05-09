@@ -174,7 +174,7 @@ export const accountRelations = relations(account, ({ one }) => ({
 export const organizationRelations = relations(organization, ({ many }) => ({
   members: many(member),
   invitations: many(invitation),
-  projects: many(project),
+  environments: many(environment),
 }));
 
 export const memberRelations = relations(member, ({ one }) => ({
@@ -201,33 +201,13 @@ export const invitationRelations = relations(invitation, ({ one }) => ({
 
 // ── Project Management Schemas ───────────────────────────────────────────────
 
-export const project = sqliteTable(
-  "project",
+export const environment = sqliteTable(
+  "environment",
   {
     id: text("id").primaryKey(),
     organizationId: text("organization_id")
       .notNull()
       .references(() => organization.id, { onDelete: "cascade" }),
-    name: text("name").notNull(),
-    description: text("description"),
-    createdAt: integer("created_at", { mode: "timestamp_ms" })
-      .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
-      .notNull(),
-    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
-      .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
-      .$onUpdate(() => new Date())
-      .notNull(),
-  },
-  (table) => [index("project_organizationId_idx").on(table.organizationId)],
-);
-
-export const environment = sqliteTable(
-  "environment",
-  {
-    id: text("id").primaryKey(),
-    projectId: text("project_id")
-      .notNull()
-      .references(() => project.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
     createdAt: integer("created_at", { mode: "timestamp_ms" })
       .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
@@ -238,8 +218,11 @@ export const environment = sqliteTable(
       .notNull(),
   },
   (table) => [
-    index("environment_projectId_idx").on(table.projectId),
-    uniqueIndex("environment_projectId_name_uidx").on(table.projectId, table.name),
+    index("environment_organizationId_idx").on(table.organizationId),
+    uniqueIndex("environment_organizationId_name_uidx").on(
+      table.organizationId,
+      table.name,
+    ),
   ],
 );
 
@@ -262,22 +245,17 @@ export const variable = sqliteTable(
   },
   (table) => [
     index("variable_environmentId_idx").on(table.environmentId),
-    uniqueIndex("variable_environmentId_key_uidx").on(table.environmentId, table.key),
+    uniqueIndex("variable_environmentId_key_uidx").on(
+      table.environmentId,
+      table.key,
+    ),
   ],
 );
 
-export const projectRelations = relations(project, ({ one, many }) => ({
-  organization: one(organization, {
-    fields: [project.organizationId],
-    references: [organization.id],
-  }),
-  environments: many(environment),
-}));
-
 export const environmentRelations = relations(environment, ({ one, many }) => ({
-  project: one(project, {
-    fields: [environment.projectId],
-    references: [project.id],
+  organization: one(organization, {
+    fields: [environment.organizationId],
+    references: [organization.id],
   }),
   variables: many(variable),
 }));
@@ -288,4 +266,3 @@ export const variableRelations = relations(variable, ({ one }) => ({
     references: [environment.id],
   }),
 }));
-

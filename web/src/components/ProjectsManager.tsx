@@ -180,6 +180,24 @@ export function ProjectsManager({
                           {project.description}
                         </p>
                       )}
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {(project.environments?.length ?? 0) > 0 ? (
+                          project.environments.map(
+                            (stage: { id: string; name: string }) => (
+                              <span
+                                key={stage.id}
+                                className="inline-flex items-center rounded-md border px-2 py-1 text-xs font-medium text-muted-foreground"
+                              >
+                                {stage.name}
+                              </span>
+                            ),
+                          )
+                        ) : (
+                          <span className="text-xs text-muted-foreground">
+                            No stages
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <div className="mt-auto pt-4 flex gap-2">
                       <Button

@@ -1,7 +1,12 @@
 import { useForm } from "@tanstack/react-form";
 
 import { createTeamSchema } from "@api/schemas/teams.schemas";
-import { useTeams, useCreateTeam, useDeleteTeam, useUpdateTeam } from "../queries/teams.queries";
+import {
+  useTeams,
+  useCreateTeam,
+  useDeleteTeam,
+  useUpdateTeam,
+} from "../queries/teams.queries";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -36,8 +41,16 @@ export function TeamsManager() {
     setEditingTeamId(null);
   };
 
-  if (isLoading) return <div className="text-sm text-muted-foreground">Loading teams...</div>;
-  if (error) return <div className="text-sm text-destructive">Error loading teams: {error.message}</div>;
+  if (isLoading)
+    return (
+      <div className="text-sm text-muted-foreground">Loading teams...</div>
+    );
+  if (error)
+    return (
+      <div className="text-sm text-destructive">
+        Error loading teams: {error.message}
+      </div>
+    );
 
   return (
     <div className="space-y-8">
@@ -66,7 +79,9 @@ export function TeamsManager() {
                   className="w-full"
                 />
                 {field.state.meta.errors ? (
-                  <p className="text-sm text-destructive">{field.state.meta.errors.join(", ")}</p>
+                  <p className="text-sm text-destructive">
+                    {field.state.meta.errors.join(", ")}
+                  </p>
                 ) : null}
               </div>
             )}
@@ -74,7 +89,11 @@ export function TeamsManager() {
           <form.Subscribe
             selector={(state) => [state.canSubmit, state.isSubmitting]}
             children={([canSubmit, isSubmitting]) => (
-              <Button type="submit" disabled={!canSubmit || isSubmitting} className="w-full">
+              <Button
+                type="submit"
+                disabled={!canSubmit || isSubmitting}
+                className="w-full"
+              >
                 {isSubmitting ? "Creating..." : "Create Team"}
               </Button>
             )}
@@ -86,10 +105,15 @@ export function TeamsManager() {
         <h2 className="text-2xl font-semibold">Your Teams</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {teams?.length === 0 ? (
-            <p className="text-sm text-muted-foreground">You don't have any teams yet.</p>
+            <p className="text-sm text-muted-foreground">
+              You don't have any teams yet.
+            </p>
           ) : (
             teams?.map((team) => (
-              <div key={team.id} className="p-6 border rounded-xl shadow-sm bg-card text-card-foreground flex flex-col space-y-4 transition-all hover:shadow-md">
+              <div
+                key={team.id}
+                className="p-6 border rounded-xl shadow-sm bg-card text-card-foreground flex flex-col space-y-4 transition-all hover:shadow-md"
+              >
                 {editingTeamId === team.id ? (
                   <div className="space-y-4">
                     <div className="space-y-2">
@@ -101,10 +125,18 @@ export function TeamsManager() {
                       />
                     </div>
                     <div className="flex gap-2">
-                      <Button size="sm" onClick={() => handleEditSubmit(team.id)} disabled={updateTeam.isPending}>
+                      <Button
+                        size="sm"
+                        onClick={() => handleEditSubmit(team.id)}
+                        disabled={updateTeam.isPending}
+                      >
                         Save
                       </Button>
-                      <Button size="sm" variant="outline" onClick={() => setEditingTeamId(null)}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setEditingTeamId(null)}
+                      >
                         Cancel
                       </Button>
                     </div>
@@ -112,12 +144,16 @@ export function TeamsManager() {
                 ) : (
                   <>
                     <div>
-                      <h3 className="font-semibold text-xl tracking-tight">{team.name}</h3>
-                      <p className="text-xs text-muted-foreground mt-1">ID: {team.id}</p>
+                      <h3 className="font-semibold text-xl tracking-tight">
+                        {team.name}
+                      </h3>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        ID: {team.id}
+                      </p>
                     </div>
                     <div className="mt-auto pt-4 flex flex-col gap-3">
                       <Button asChild className="w-full">
-                        <Link to={`/dashboard/teams/${team.id}`}>
+                        <Link to="/$slug" params={{ slug: team.slug }}>
                           View Projects
                         </Link>
                       </Button>

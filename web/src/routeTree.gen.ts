@@ -12,8 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
+import { Route as SlugRouteRouteImport } from './routes/$slug/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as SlugIndexRouteImport } from './routes/$slug/index'
 import { Route as DashboardTeamsIndexRouteImport } from './routes/dashboard/teams/index'
 import { Route as DashboardTeamsTeamIdRouteImport } from './routes/dashboard/teams/$teamId'
 
@@ -32,6 +34,11 @@ const DashboardRouteRoute = DashboardRouteRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SlugRouteRoute = SlugRouteRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -41,6 +48,11 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DashboardRouteRoute,
+} as any)
+const SlugIndexRoute = SlugIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SlugRouteRoute,
 } as any)
 const DashboardTeamsIndexRoute = DashboardTeamsIndexRouteImport.update({
   id: '/teams/',
@@ -55,9 +67,11 @@ const DashboardTeamsTeamIdRoute = DashboardTeamsTeamIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/$slug': typeof SlugRouteRouteWithChildren
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/$slug/': typeof SlugIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/teams/$teamId': typeof DashboardTeamsTeamIdRoute
   '/dashboard/teams/': typeof DashboardTeamsIndexRoute
@@ -66,6 +80,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/$slug': typeof SlugIndexRoute
   '/dashboard': typeof DashboardIndexRoute
   '/dashboard/teams/$teamId': typeof DashboardTeamsTeamIdRoute
   '/dashboard/teams': typeof DashboardTeamsIndexRoute
@@ -73,9 +88,11 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/$slug': typeof SlugRouteRouteWithChildren
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/$slug/': typeof SlugIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/teams/$teamId': typeof DashboardTeamsTeamIdRoute
   '/dashboard/teams/': typeof DashboardTeamsIndexRoute
@@ -84,9 +101,11 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/$slug'
     | '/dashboard'
     | '/sign-in'
     | '/sign-up'
+    | '/$slug/'
     | '/dashboard/'
     | '/dashboard/teams/$teamId'
     | '/dashboard/teams/'
@@ -95,15 +114,18 @@ export interface FileRouteTypes {
     | '/'
     | '/sign-in'
     | '/sign-up'
+    | '/$slug'
     | '/dashboard'
     | '/dashboard/teams/$teamId'
     | '/dashboard/teams'
   id:
     | '__root__'
     | '/'
+    | '/$slug'
     | '/dashboard'
     | '/sign-in'
     | '/sign-up'
+    | '/$slug/'
     | '/dashboard/'
     | '/dashboard/teams/$teamId'
     | '/dashboard/teams/'
@@ -111,6 +133,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  SlugRouteRoute: typeof SlugRouteRouteWithChildren
   DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
@@ -139,6 +162,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/$slug': {
+      id: '/$slug'
+      path: '/$slug'
+      fullPath: '/$slug'
+      preLoaderRoute: typeof SlugRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -152,6 +182,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/'
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
+    }
+    '/$slug/': {
+      id: '/$slug/'
+      path: '/'
+      fullPath: '/$slug/'
+      preLoaderRoute: typeof SlugIndexRouteImport
+      parentRoute: typeof SlugRouteRoute
     }
     '/dashboard/teams/': {
       id: '/dashboard/teams/'
@@ -169,6 +206,18 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface SlugRouteRouteChildren {
+  SlugIndexRoute: typeof SlugIndexRoute
+}
+
+const SlugRouteRouteChildren: SlugRouteRouteChildren = {
+  SlugIndexRoute: SlugIndexRoute,
+}
+
+const SlugRouteRouteWithChildren = SlugRouteRoute._addFileChildren(
+  SlugRouteRouteChildren,
+)
 
 interface DashboardRouteRouteChildren {
   DashboardIndexRoute: typeof DashboardIndexRoute
@@ -188,6 +237,7 @@ const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  SlugRouteRoute: SlugRouteRouteWithChildren,
   DashboardRouteRoute: DashboardRouteRouteWithChildren,
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,

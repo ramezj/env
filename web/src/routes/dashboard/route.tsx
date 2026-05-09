@@ -4,6 +4,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeaders } from "@tanstack/react-start/server";
 import { SidebarProvider, SidebarTrigger } from "../../components/ui/sidebar";
 import { AppSidebar } from "../../components/app-sidebar";
+import { TeamsManager } from "#/components/TeamsManager";
 
 const fetchServerSession = createServerFn({ method: "GET" }).handler(
   async () => {
@@ -36,17 +37,9 @@ function DashboardLayout() {
   const { session } = Route.useRouteContext();
 
   return (
-    <SidebarProvider>
-      <AppSidebar user={session.user} />
-      <main className="flex-1">
-        <div className="p-4 border-b bg-sidebar h-16 flex items-center justify-start sticky top-0">
-          <h1 className="text-lg font-semibold">Dashboard</h1>
-          {/* <SidebarTrigger /> */}
-        </div>
-        <div className="p-4">
-          <Outlet />
-        </div>
-      </main>
-    </SidebarProvider>
+    <>
+      Pick Team
+      <TeamsManager />
+    </>
   );
 }

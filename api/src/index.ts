@@ -5,6 +5,7 @@ import { cors } from "hono/cors";
 import { auth } from "./auth";
 import { teamsRouter } from "./routes/teams.router";
 import { meRouter } from "./routes/me.router";
+import { projectsRouter } from "./routes/projects.router";
 
 const app = new Hono()
   .use(
@@ -19,7 +20,8 @@ const app = new Hono()
   .on(["GET", "POST"], "/api/auth/**", (c) => auth.handler(c.req.raw))
   // App routes — must be chained so TypeScript captures the route types
   .route("/api/me", meRouter)
-  .route("/api/teams", teamsRouter);
+  .route("/api/teams", teamsRouter)
+  .route("/api/projects", projectsRouter);
 
 const port = Number(process.env.PORT) || 4000;
 

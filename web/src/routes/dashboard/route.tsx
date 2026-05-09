@@ -38,8 +38,8 @@ function DashboardLayout() {
   return (
     <SidebarProvider>
       <AppSidebar user={session.user} />
-      <main className="flex-1 overflow-y-auto">
-        <div className="p-4 border-b bg-sidebar h-16 flex items-center justify-start">
+      <main className="flex-1">
+        <div className="p-4 border-b bg-sidebar h-16 flex items-center justify-start sticky top-0">
           <h1 className="text-lg font-semibold">Dashboard</h1>
           {/* <SidebarTrigger /> */}
         </div>

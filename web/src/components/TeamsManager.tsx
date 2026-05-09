@@ -6,6 +6,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { useState } from "react";
+import { Link } from "@tanstack/react-router";
 
 export function TeamsManager() {
   const { data: teams, isLoading, error } = useTeams();
@@ -114,27 +115,34 @@ export function TeamsManager() {
                       <h3 className="font-semibold text-xl tracking-tight">{team.name}</h3>
                       <p className="text-xs text-muted-foreground mt-1">ID: {team.id}</p>
                     </div>
-                    <div className="mt-auto pt-4 flex gap-3">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex-1"
-                        onClick={() => {
-                          setEditingTeamId(team.id);
-                          setEditName(team.name);
-                        }}
-                      >
-                        Edit
+                    <div className="mt-auto pt-4 flex flex-col gap-3">
+                      <Button asChild className="w-full">
+                        <Link to={`/dashboard/teams/${team.id}`}>
+                          View Projects
+                        </Link>
                       </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        className="flex-1"
-                        onClick={() => deleteTeam.mutate(team.id)}
-                        disabled={deleteTeam.isPending}
-                      >
-                        Delete
-                      </Button>
+                      <div className="flex gap-3">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1"
+                          onClick={() => {
+                            setEditingTeamId(team.id);
+                            setEditName(team.name);
+                          }}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="flex-1"
+                          onClick={() => deleteTeam.mutate(team.id)}
+                          disabled={deleteTeam.isPending}
+                        >
+                          Delete
+                        </Button>
+                      </div>
                     </div>
                   </>
                 )}

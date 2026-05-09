@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { TeamsManager } from "../../components/TeamsManager";
+import { TeamsManager } from "../../../components/TeamsManager";
 
-export const Route = createFileRoute("/dashboard/teams")({
+export const Route = createFileRoute("/dashboard/teams/")({
   component: TeamsPage,
 });
 

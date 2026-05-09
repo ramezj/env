@@ -7,7 +7,7 @@ export const Route = createFileRoute("/dashboard/teams")({
 
 function TeamsPage() {
   return (
-    <div className="max-w-5xl mx-auto p-6 md:p-12 space-y-12">
+    <div className="max-w-5xl">
       <div className="space-y-2">
         <h1 className="text-4xl font-extrabold tracking-tight">
           Organizations

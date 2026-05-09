@@ -9,7 +9,7 @@ function DashboardOverviewPage() {
   const { session } = Route.useRouteContext();
 
   return (
-    <div className="max-w-5xl p-6 md:p-12 space-y-8">
+    <div className="max-w-5xl">
       <div className="space-y-2">
         <h1 className="text-4xl font-bold tracking-tight">Overview</h1>
         <p className="text-lg text-muted-foreground">
